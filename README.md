@@ -1,338 +1,171 @@
-# experiment-1
-mini project
 Traffic Violation Detector – Live Streaming Web App
 
 A real-time traffic violation detection system built using YOLOv8, Object Tracking, and Flask Live Streaming.
 
-The system analyzes uploaded traffic videos and detects:
+* The system analyzes uploaded traffic videos and detects:
 
- *  Speeding Vehicles
+* Speeding Vehicles
 
- *  Risky / Weaving Maneuvers
+* Risky / Weaving Maneuvers
 
-  *   Phone Usage by Drivers
+* Phone Usage by Drivers
 
 It displays live annotated video, violation statistics, and generates a structured JSON report.
+1. Project Overview
 
-            1. Project Overview
+This application allows users to:
 
-This application allows a user to:
+1. Upload a traffic video
 
- Upload a traffic video.
- Process it using object detection and tracking.
- Detect violations using motion-based rules.
- Stream annotated results live in the browser.
- Download the processed video.
- Export violation logs in JSON format.
- The backend is built using Flask, and the frontend streams results using MJPEG.
+2. Process it using object detection and tracking
 
-           2. System Architecture
-           
-             High-Level Architecture
-                 User Upload
-                      ↓
-                  Flask Server
-                      ↓
-                YOLOv8 Detection
-                      ↓
-            Object Tracking (Track IDs)
-                      ↓
-          Motion Analysis (Speed + Weaving)
-                      ↓
-           Rule-Based Violation Engine
-                      ↓
-          Live MJPEG Stream + JSON Log
+3. Detect violations using motion-based rules
 
- Component Architecture
-1️. Frontend (HTML + JS)
+4. Stream annotated results live in the browser
 
- * Video upload interface
+5. Download the processed video
 
- * Live MJPEG stream viewer
+6. Export violation logs in JSON format
 
- * Real-time violation counters
+Backend: Flask
+Frontend: MJPEG-based live streaming
 
- * Live violation log panel
+2. System Architecture
 
- * Download processed video button
+User Upload
+     ↓
+Flask Server
+     ↓
+YOLOv8 Detection
+     ↓
+Object Tracking (Track IDs)
+     ↓
+Motion Analysis (Speed + Weaving)
+     ↓
+Rule-Based Violation Engine
+     ↓
+Live MJPEG Stream + JSON Log
 
-2️. Backend (Flask – app.py)
+Component Architecture
+1. Frontend (HTML + JavaScript)
 
- *  Key Responsibilities:
+* Video upload interface
 
- *  Handle video upload
+* Live MJPEG stream viewer
 
- *  Create unique job IDs
+* Real-time violation counters
 
- * Run detection in background thread
+* Live violation log panel
 
- * Stream frames using MJPEG
+* Download processed video button
+  
+2. Backend (Flask – app.py)
 
-Provide status & summary via API
+Key Responsibilities:
 
-Allow video download
+1. Handle video upload
 
-Important endpoints:
+2. Create unique job IDs
 
-Route	Purpose
-/	Main UI
-/upload	Upload video
-/stream/<job_id>	Live annotated stream
-/status/<job_id>	Real-time stats
-/download/<job_id>	Download output video
-3️. Detection Engine
+3. Run detection in background thread
 
+4. Stream frames using MJPEG
+
+5. Provide status and summary via API
+
+6. Allow video download
+
+3. Detection Engine
 Implemented inside:
 
+CODE
 detect_violations_live()
 
-It performs:
+Performs:
 
-YOLO object detection
+* YOLO object detection
 
-Object tracking
+* Object tracking
 
-Speed estimation
+* Speed estimation
 
-Lateral movement analysis
+* Lateral movement analysis
 
-Phone overlap detection
+* Phone overlap detection
 
-Violation logging
+* Violation logging
 
- 3. Methods Used
- 4.  Object Detection
+3. Methods Used
+1. Object Detection
 
 Model Used: YOLOv8
 
 Detects:
 
-Vehicles (cars, bikes, trucks, buses)
+1.Vehicles (cars, bikes, trucks, buses)
 
-Persons
+2.Persons
 
-Mobile phones
+3.Mobile phones
 
-Each detection produces:
+Each detection provides:
 
-Bounding box
+1.Bounding box
 
-Confidence score
+2.Confidence score
 
-Class label
+3.Class label
 
-2️. Object Tracking
-
-Each detected object is assigned a:
-
-Track ID
+2. Object Tracking
+Each detected object is assigned a Track ID.
 
 This allows:
 
-Tracking the same vehicle across frames
+* Tracking the same vehicle across frames
 
-Measuring motion over time
+* Measuring motion over time
 
-Logging unique violations per object
-
-3️. Speed Estimation Method
-
+* Logging unique violations per object
+  
+3. Speed Estimation Method
 Speed is approximated as:
 
 Pixel Distance Between Consecutive Frames
-
-Formula:
-
 speed = √((x2 - x1)² + (y2 - y1)²)
 
-If speed exceeds threshold → Speeding violation.
-
-4️. Risky Maneuver Detection
-
-We calculate lateral movement (left-right jitter):
+4. Risky Maneuver Detection
+Lateral movement is calculated as:
 
 lateral_shift = |x_current - x_previous|
 
-If:
-
-Vehicle is moving fast
-
-AND lateral movement is high
-
-→ Marked as RISKY MOVE
-
-Risk Score (0–1):
-
-Combination of:
-
-Normalized speed
-
-Lateral instability
-
-Higher score = more dangerous behavior.
-
-5️. Phone Usage Detection
-
-Logic:
-
-If:
-
-A detected phone box
-
-Strongly overlaps with a person box
-
-Using Intersection over Union (IoU):
-
-IoU = Overlap Area / Union Area
-
-If IoU > threshold → PHONE violation.
-
- 4. Live Streaming Mechanism
-
-Technology Used: MJPEG Streaming
-
-Backend:
-
-Frames are pushed into a queue.
-
-Flask streams frames using:
-
-multipart/x-mixed-replace
-
-Frontend:
-
-<img> tag continuously receives updated frames.
-
-Live overlay shows:
-
-ID
-
-Speed
-
-Risk score
-
-Violation label
- 5. Output System
- On-Video Overlay
+5. Output System
+On-Video Overlay
 
 Each object displays:
 
-1. Bounding box
+1.Bounding box
+2.Track ID
+3.Speed
+4.Risk score
+5.Violation label
 
-2. Track ID
+| Color  | Meaning        |
+| ------ | -------------- |
+| Green  | Normal         |
+| Blue   | Speeding       |
+| Orange | Risky Maneuver |
+| Pink   | Phone Use      |
 
-3. SPEED
 
-4. RISK score
-
-5. Violation label
-
-Color-coded box:
-
-Color	Meaning
-* Green	Normal
-* Blue	Speeding
-* Orange	Risky Maneuver
-* Pink	Phone Use
-* Live Violation Log
-
-Each entry contains:
-
-1. Violation type
-
-2. Track ID
-
-3. Frame number
-
-4. Object center position (x, y)
-
- JSON Output File
-
-Saved at:
-
-outputs/<job_id>_output.json
-
-Contains:
-
-{
-  "summary": {
-    "speeding": 3,
-    "risky": 2,
-    "phone": 1
-  },
-  "events": [
-    {
-      "violation": "speeding",
-      "track_id": 7,
-      "frame": 245,
-      "position": [320, 180]
-    }
-  ]
-}
 6. Technologies Used
 
-1. Python
+* Python
+* Flask
+* OpenCV
+* NumPy
+* YOLOv8
+* HTML
+* CSS
+* JavaScript
+* MJPEG Streaming
 
-2. Flask
-
-3. OpenCV
-
-4. NumPy
-
-5. YOLOv8
-
-6. HTML/CSS
-
-7. JavaScript
-
-8. MJPEG Streaming
-
-9.Threading & Queue
-
- 7. Key Features
-
-✅ Real-time live video streaming
-✅ Multi-object tracking
-✅ Speed estimation
-✅ Risk scoring
-✅ Phone usage detection
-✅ Unique violation counting
-✅ JSON report generation
-✅ Downloadable processed video
-
- 8. How to Run
-  python app.py
-
-  Open:
-
-http://localhost:5000
-
-Upload video → Start live detection.
-
- 9. Applications
-
-* Smart city traffic monitoring
-
-* Automated violation detection
-
-* Law enforcement analytics
-
-* Road safety research
-
-* AI-based traffic surveillance
-
-10. Future Improvements
-
-* Real-world speed calibration (km/h)
-
-* Lane detection integration
-
-* License plate recognition
-
-* Cloud deployment
-
-* Database integration
-
-* Dashboard analytics
-
-* Deep learning risk prediction model
